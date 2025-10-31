@@ -1,0 +1,289 @@
+import React, { useState, useEffect } from 'react';
+import { Download, Upload, BarChart3, CheckCircle2, XCircle, Circle } from 'lucide-react';
+
+const RecoveryAssessmentTool = () => {
+  const [responses, setResponses] = useState({});
+  const [activeTab, setActiveTab] = useState('framework');
+
+  const pillars = [
+    {
+      id: 'pillar1',
+      name: 'Recovery Framework Prepared',
+      description: 'Frameworks for post-disaster recovery and reconstruction',
+      questions: ['RC-1A-1', 'RC-1A-2', 'RC-1A-3', 'RC-1A-4', 'RC-1A-5', 'RC-1A-6', 'RC-1A-7', 'RC-1A-8']
+    },
+    {
+      id: 'pillar2',
+      name: 'Post-Disaster Needs Assessment Tools',
+      description: 'Guidelines and policies for damage and needs assessments',
+      questions: [
+        'RC-1B-1', 'RC-1B-2', 'RC-1B-3', 'RC-1B-4', 'RC-1B-5', 
+        'RC-1B-6', 'RC-1B-7', 'RC-1B-8', 'RC-1B-9', 'RC-1B-10',
+        'RC-1C-1', 'RC-1C-2',
+        'RC-2-1', 'RC-2-2', 'RC-2-3', 'RC-2-4', 'RC-2-5',
+        'RC-2-6', 'RC-2-7', 'RC-2-8', 'RC-2-9', 'RC-2-10'
+      ]
+    },
+    {
+      id: 'pillar3',
+      name: 'Building Back Better Principles',
+      description: 'Integration of resilience and risk reduction in reconstruction',
+      questions: ['RC-3-1', 'RC-3-2', 'RC-3-3', 'RC-3-4']
+    }
+  ];
+
+  const questions = {
+    'RC-1A-1': 'Are there regulations on post-disaster recovery that define the state\'s responsibility for this process?',
+    'RC-1A-2': 'Are there regulations that establish the recovery of livelihoods as a purpose of post-disaster recovery?',
+    'RC-1A-3': 'Are there regulations that establish institutional schemes for the coordination of post-disaster reconstruction?',
+    'RC-1A-4': 'Are there regulations that establish studies on the causes of disasters in order to guide a recovery that prevents the return of the pre-existing risk conditions?',
+    'RC-1A-5': 'Are there regulations mandating the formulation of post-disaster recovery plans that explicitly seek to reduce pre-existing vulnerability?',
+    'RC-1A-6': 'Are there regulations mandating the ex-ante formulation of post-disaster recovery plans?',
+    'RC-1A-7': 'Are there regulations that state that post-disaster recovery plans should define the duration of the phase that will support the restoration of livelihoods?',
+    'RC-1A-8': 'Are there regulations that state that post-disaster recovery plans must define the length of time in which affected homes must be repaired or rebuilt?',
+    'RC-1B-1': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the environmental sector regulations?',
+    'RC-1B-2': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the agriculture sector regulations?',
+    'RC-1B-3': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the health sector regulations?',
+    'RC-1B-4': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the housing sector regulations?',
+    'RC-1B-5': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the education sector regulations?',
+    'RC-1B-6': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the tourism sector regulations?',
+    'RC-1B-7': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the transport sector regulations?',
+    'RC-1B-8': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the water and sanitation sector regulations?',
+    'RC-1B-9': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the telecommunication sector regulations?',
+    'RC-1B-10': 'Are the responsibilities for carrying out post-disaster recovery preparation activities defined under the energy sector regulations?',
+    'RC-1C-1': 'Are there regulations governing the evaluation, revision or updating of development plans after a disaster has occurred?',
+    'RC-1C-2': 'Are there regulations governing the evaluation, revision or updating of land use plans after a disaster has occurred?',
+    'RC-2-1': 'Does the Ministry of Environment have an ex-ante post-disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-2': 'Does the Ministry of Agriculture have an ex-ante disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-3': 'Does the Ministry of Health have an ex-ante post-disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-4': 'Does the Ministry of Housing have an ex-ante post-disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-5': 'Does the Ministry of Education have an ex-ante disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-6': 'Does the Ministry of Tourism have an ex-ante disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-7': 'Does the Ministry of Transport have an ex-ante disaster recovery plan for the sector that has been formally approved at least within the last 5 years?',
+    'RC-2-8': 'Does the water and sanitation sector have an ex-ante post-disaster recovery plan that has been formally approved at least within the last 5 years?',
+    'RC-2-9': 'Does the telecommunications sector have an ex-ante disaster recovery plan that has been formally approved at least within the last 5 years?',
+    'RC-2-10': 'Does the energy sector have an ex-ante post disaster recovery plan that has been formally approved at least within the last 5 years?',
+    'RC-3-1': 'Are there regulations that establish mechanisms for the participation of civil society or social and non-governmental organizations in post-disaster recovery?',
+    'RC-3-2': 'Has any national controlling entity carried out at least one assessment on how the government managed the recovery process in at least one of the last 5 major disasters?',
+    'RC-3-3': 'In at least one of the last 5 nationally declared disaster situations, has any mechanism been activated to inform the affected population about the recovery?',
+    'RC-3-4': 'In at least one of the last 5 nationally declared disasters, has any community participation mechanism been activated for recovery?'
+  };
+
+  const calculatePillarScore = (pillar) => {
+    const pillarQuestions = pillar.questions;
+    const answered = pillarQuestions.filter(q => responses[q] !== undefined).length;
+    const yesCount = pillarQuestions.filter(q => responses[q] === 'yes').length;
+    
+    return {
+      total: pillarQuestions.length,
+      answered,
+      yes: yesCount,
+      percentage: answered > 0 ? Math.round((yesCount / pillarQuestions.length) * 100) : 0
+    };
+  };
+
+  const getMaturityLevel = (percentage) => {
+    if (percentage >= 75) return { level: 'Advanced', color: 'bg-green-500' };
+    if (percentage >= 50) return { level: 'Established', color: 'bg-blue-500' };
+    if (percentage >= 25) return { level: 'Emerging', color: 'bg-yellow-500' };
+    return { level: 'Nascent', color: 'bg-red-500' };
+  };
+
+  const handleResponse = (code, value) => {
+    setResponses(prev => ({
+      ...prev,
+      [code]: value
+    }));
+  };
+
+  const exportToCSV = () => {
+    let csv = 'Pillar,Question Code,Question,Response,Notes\n';
+    
+    pillars.forEach(pillar => {
+      pillar.questions.forEach(qCode => {
+        const response = responses[qCode] || 'Not Answered';
+        csv += `"${pillar.name}","${qCode}","${questions[qCode]}","${response}",""\n`;
+      });
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'recovery_reconstruction_assessment.csv';
+    a.click();
+  };
+
+  const ResponseButton = ({ code, value }) => {
+    const isSelected = responses[code] === value;
+    const bgColor = value === 'yes' ? 'bg-green-500' : 'bg-red-500';
+    
+    return (
+      <button
+        onClick={() => handleResponse(code, value)}
+        className={`px-4 py-2 rounded ${
+          isSelected 
+            ? `${bgColor} text-white` 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        } transition-colors`}
+      >
+        {value === 'yes' ? (
+          <CheckCircle2 className="inline mr-1" size={16} />
+        ) : (
+          <XCircle className="inline mr-1" size={16} />
+        )}
+        {value.toUpperCase()}
+      </button>
+    );
+  };
+
+  return (
+    <div className="w-full h-screen bg-gray-50 p-6 overflow-auto">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">Recovery & Reconstruction Assessment Tool</h1>
+              <p className="text-gray-600 mt-2">Evaluate your disaster risk management framework</p>
+            </div>
+            <button
+              onClick={exportToCSV}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              <Download size={20} />
+              Export CSV
+            </button>
+          </div>
+
+          <div className="flex gap-4 border-b mb-6">
+            <button
+              onClick={() => setActiveTab('framework')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'framework'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Assessment Framework
+            </button>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'dashboard'
+                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Dashboard
+            </button>
+          </div>
+
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {pillars.map(pillar => {
+                  const score = calculatePillarScore(pillar);
+                  const maturity = getMaturityLevel(score.percentage);
+                  
+                  return (
+                    <div key={pillar.id} className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-lg border border-gray-200">
+                      <h3 className="font-bold text-lg mb-2 text-gray-800">{pillar.name}</h3>
+                      <div className="mb-4">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-600">Progress</span>
+                          <span className="font-bold text-gray-800">{score.percentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div
+                            className={`${maturity.color} h-3 rounded-full transition-all duration-500`}
+                            style={{ width: `${score.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <p className="mb-1">{score.yes} of {score.total} criteria met</p>
+                        <p className="font-semibold text-gray-800">Maturity: {maturity.level}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-xl font-bold mb-4 text-gray-800">Maturity Levels</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-6 bg-red-500 rounded"></div>
+                    <span className="font-medium">Nascent (0-24%)</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-6 bg-yellow-500 rounded"></div>
+                    <span className="font-medium">Emerging (25-49%)</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-6 bg-blue-500 rounded"></div>
+                    <span className="font-medium">Established (50-74%)</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-6 bg-green-500 rounded"></div>
+                    <span className="font-medium">Advanced (75-100%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'framework' && (
+            <div className="space-y-8">
+              {pillars.map(pillar => {
+                const score = calculatePillarScore(pillar);
+                
+                return (
+                  <div key={pillar.id} className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">{pillar.name}</h2>
+                        <p className="text-gray-600 mb-3">{pillar.description}</p>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-gray-600">
+                            Progress: <span className="font-bold text-gray-800">{score.yes}/{score.total}</span>
+                          </span>
+                          <span className="text-gray-600">
+                            Achievement: <span className="font-bold text-gray-800">{score.percentage}%</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {pillar.questions.map((qCode, idx) => (
+                        <div key={qCode} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-start gap-3">
+                                <span className="font-mono text-sm text-blue-600 font-semibold mt-1">
+                                  {qCode}
+                                </span>
+                                <p className="text-gray-800">{questions[qCode]}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2 flex-shrink-0">
+                              <ResponseButton code={qCode} value="yes" />
+                              <ResponseButton code={qCode} value="no" />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RecoveryAssessmentTool;
