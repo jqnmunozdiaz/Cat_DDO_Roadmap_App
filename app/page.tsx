@@ -7,7 +7,7 @@ export default function Overview() {
   const pillars = [
     {
       id: 'legal-institutional',
-      name: 'Legal and Institutional Framework',
+      name: '1. Legal and Institutional DRM Framework',
       description: 'Assessment of legal frameworks and institutional arrangements for DRM',
       icon: FileText,
       color: 'bg-blue-500',
@@ -15,7 +15,7 @@ export default function Overview() {
     },
     {
       id: 'risk-identification',
-      name: 'Risk Identification',
+      name: '2. Risk Identification',
       description: 'Evaluation of risk assessment and hazard identification systems',
       icon: AlertTriangle,
       color: 'bg-yellow-500',
@@ -23,23 +23,23 @@ export default function Overview() {
     },
     {
       id: 'risk-reduction',
-      name: 'Risk Reduction',
+      name: '3. Risk Reduction',
       description: 'Assessment of risk reduction strategies and implementation',
       icon: Minimize2,
       color: 'bg-green-500',
       href: '/pillars/risk-reduction'
     },
     {
-      id: 'emergency-preparedness',
-      name: 'Emergency Preparedness',
+      id: 'preparedness',
+      name: '4. Preparedness',
       description: 'Evaluation of emergency response and preparedness capabilities',
       icon: Bell,
       color: 'bg-red-500',
-      href: '/pillars/emergency-preparedness'
+      href: '/pillars/preparedness'
     },
     {
       id: 'financial-protection',
-      name: 'Financial Protection',
+      name: '5. Financial Protection',
       description: 'Assessment of financial mechanisms and disaster risk financing',
       icon: DollarSign,
       color: 'bg-purple-500',
@@ -47,7 +47,7 @@ export default function Overview() {
     },
     {
       id: 'resilient-reconstruction',
-      name: 'Resilient Reconstruction',
+      name: '6. Resilient Reconstruction',
       description: 'Evaluation of post-disaster recovery and reconstruction frameworks',
       icon: Home,
       color: 'bg-indigo-500',

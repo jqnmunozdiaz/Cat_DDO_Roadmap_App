@@ -1,12 +1,16 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Download, Home, ArrowLeft } from 'lucide-react'
+import { Download, Home, ArrowLeft, PieChart as PieChartIcon, Activity } from 'lucide-react'
 import { pillarsData, getAllQuestions } from '@/lib/pillarsData'
 import { useLocalStorage } from '@/lib/useLocalStorage'
+import PlanetaryDoughnut from '@/app/components/PlanetaryDoughnut'
+import PlanetaryRadar from '@/app/components/PlanetaryRadar'
 
 export default function Results() {
   const [responses, setResponses, isLoaded] = useLocalStorage<Record<string, string>>('drm-responses', {})
+  const [chartView, setChartView] = useState<'doughnut' | 'radar'>('doughnut')
 
   const calculatePillarScore = (pillarId: string) => {
     const pillar = pillarsData.find(p => p.id === pillarId)
@@ -129,6 +133,46 @@ export default function Results() {
   const overall = calculateOverallScore()
   const overallMaturity = getMaturityLevel(overall.percentage)
 
+  // Prepare data for Doughnut chart
+  const pillarColors = {
+    'legal-institutional': '#3b82f6',
+    'risk-identification': '#eab308',
+    'risk-reduction': '#22c55e',
+    'preparedness': '#ef4444',
+    'financial-protection': '#a855f7',
+    'resilient-reconstruction': '#6366f1'
+  }
+
+  const doughnutData = pillarsData.map(pillar => {
+    const score = calculatePillarScore(pillar.id)
+    return {
+      name: pillar.name,
+      value: score.percentage,
+      color: pillarColors[pillar.id as keyof typeof pillarColors] || '#6b7280',
+      percentage: score.percentage
+    }
+  })
+
+  // Prepare data for Radar chart
+  const radarData = pillarsData.map(pillar => {
+    const score = calculatePillarScore(pillar.id)
+    // Abbreviate pillar names for better display
+    const abbreviations: { [key: string]: string } = {
+      'legal-institutional': 'Legal & Inst.',
+      'risk-identification': 'Risk ID',
+      'risk-reduction': 'Risk Reduction',
+      'preparedness': 'Preparedness',
+      'financial-protection': 'Financial',
+      'resilient-reconstruction': 'Reconstruction'
+    }
+    return {
+      pillar: abbreviations[pillar.id] || pillar.name,
+      fullName: pillar.name,
+      achievement: score.percentage,
+      target: 75 // Target threshold for advanced maturity
+    }
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm border-b">
@@ -178,6 +222,61 @@ export default function Results() {
               <div className="text-5xl font-bold mb-2">{overallMaturity.level}</div>
               <div className="text-blue-100">Overall Maturity</div>
             </div>
+          </div>
+        </div>
+
+        {/* Planetary Boundaries Style Visualization */}
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">DRM Assessment Overview</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setChartView('doughnut')}
+                className={`flex items-center gap-2 px-4 py-2 rounded transition-colors ${
+                  chartView === 'doughnut' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <PieChartIcon size={16} />
+                Doughnut
+              </button>
+              <button
+                onClick={() => setChartView('radar')}
+                className={`flex items-center gap-2 px-4 py-2 rounded transition-colors ${
+                  chartView === 'radar' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Activity size={16} />
+                Radar
+              </button>
+            </div>
+          </div>
+          
+          <div className="h-96 md:h-[500px]">
+            {chartView === 'doughnut' ? (
+              <PlanetaryDoughnut 
+                data={doughnutData}
+                centerText="Overall DRM Achievement"
+                centerValue={`${overall.percentage}%`}
+              />
+            ) : (
+              <PlanetaryRadar data={radarData} />
+            )}
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+            {pillarsData.map(pillar => (
+              <div key={pillar.id} className="flex items-center gap-2">
+                <div 
+                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: pillarColors[pillar.id as keyof typeof pillarColors] }}
+                />
+                <span className="text-sm text-gray-700">{pillar.name}</span>
+              </div>
+            ))}
           </div>
         </div>
 
